@@ -1,7 +1,4 @@
 class User:
-    first_name = ""
-    last_name = ""
-
     def __init__(self, _first_name, _last_name):
         self.first_name = _first_name
         self.last_name = _last_name
