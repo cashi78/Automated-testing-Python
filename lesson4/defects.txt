@@ -1,0 +1,37 @@
+Баг 1:
+
+1. Модуль string_utils
+2. Класс StringUtils
+3. Метод StringUtils.to_list(self, string: str, delimeter=",") -> list[str]
+4. Ошибка AssertionError: assert ['1', '2', '3'] == ['1', ' 2', ' 3']
+
+STR:
+s = StringUtils()
+list = s.to_list('1, 2, 3')
+
+ER:
+list == ['1', '2', '3']
+
+AR:
+list == ['1', ' 2', ' 3']
+
+Комментарий : при генерации списка из строки метод оставляет лишние пробелы в элементах списка 
+
+Баг 2:
+
+1. Модуль string_utils
+2. Класс StringUtils
+3. Метод StringUtils.is_empty(self, string: str) -> bool
+4. Ошибка AssertionError: assert False == True
+
+STR:
+s = StringUtils()
+result = s.is_empty(' ') # 1 пробел
+
+ER:
+result == False
+
+AR:
+result == True
+
+Комментарий : строка с одним(и) пробелом не является пустой
