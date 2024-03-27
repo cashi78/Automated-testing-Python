@@ -1,5 +1,7 @@
-from driver import driver  # выбор браузера для всех моих тестов в файле driver.py
-from CalcPage import CalcPage
+import sys
+sys.path[0] = '\\'.join(sys.path[0].split('\\')[:-1])
+from tests.driver import driver  # выбор браузера для всех моих тестов в файле driver.py
+from pages.CalcPage import CalcPage
 
 
 def test_calc():

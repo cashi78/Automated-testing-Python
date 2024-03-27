@@ -1,4 +1,4 @@
-from driver import driver
+from tests.driver import driver
 from selenium.webdriver.common.by import By
 
 
