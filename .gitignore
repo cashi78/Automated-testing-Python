@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 
+my.py
 # Файлы конфигурации для venv
 venv/
 .env

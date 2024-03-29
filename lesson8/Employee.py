@@ -19,33 +19,19 @@ class Employee:
         assert responce.status_code == 200, responce.json()
         return responce.json()
 
-    def new(self, first_name, last_name, mid_name, email, url, phone, birthdate, is_active=True):  # Новый сотрудник
-        schema = {
-            "firstName": first_name,
-            "lastName": last_name,
-            "middleName": mid_name,
-            "companyId": int(self.comp_id),
-            "email": email,
-            "url": url,
-            "phone": str(phone).replace('+', '').replace(' ', ''),
-            "birthdate": birthdate,
-            "isActive": is_active
-        }
+    def new(self, firstName, lastName, middleName, email, url, phone, birthdate, isActive=True):  # Новый сотрудник
+        schema = locals()
+        schema.pop('self')
+        schema['phone'] = str(phone).replace('+', '').replace(' ', '')
+        schema['companyId'] = int(self.comp_id)
         responce = requests.post(base_url + self.api_method, headers=token(), json=schema)
         assert responce.status_code == 201, responce.json()
         return responce.json()
 
-    def edit(self, id, first_name, last_name, mid_name, email, url, phone, birthdate, is_active=True):  # Редактируем сотрудника
-        schema = {
-            "firstName": first_name,
-            "lastName": last_name,
-            "middleName": mid_name,
-            "email": email,
-            "url": url,
-            "phone": str(phone).replace('+', '').replace(' ', ''),
-            "birthdate": birthdate,
-            "isActive": is_active
-        }
-        responce = requests.patch(base_url + 'employee/' + str(id), headers=token(), json=schema)
+    def edit(self, id, firstName, lastName, middleName, email, url, phone, birthdate, isActive=True):  # Редактируем сотрудника
+        schema = locals()
+        schema.pop('self')
+        schema['phone'] = str(phone).replace('+', '').replace(' ', '')
+        responce = requests.patch(base_url + self.api_method + '/' + str(id), headers=token(), json=schema)
         assert responce.status_code == 200, responce.json()
         return responce.json()
