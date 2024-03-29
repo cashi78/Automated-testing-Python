@@ -1,51 +1,82 @@
 import pytest
+from faker import Faker
 from Auth import login
 from Company import Company
 from Employee import Employee
 
-comp_id = Company().list()[-1]['id']  # Берем id последней компании
-my_employee = Employee(comp_id)  # Сотрудники этой компании
 
-login('leonardo', 'leads')
+login('raphael', 'cool-but-crude')
+
+c = Company()
+for i in c.list():
+    pass  # c.del_company(i['id'])  # Когда нужно вручную почистить за собой после упавших тестов
+
+fake = Faker('ru_RU')
 
 
 @pytest.mark.parametrize(
     ('first_name, last_name, mid_name, email, url, phone, birthdate, is_active'),
     [
         # Позитивные тесты
-        ('Иванов', 'Иван', 'Иванович', 'test@test.ru', 'http://test.test', '1234567890', '2000-01-01', True),  # Все поля
-        ('First', 'Last', '', 'qwerty@rt.ru', '', '', '2000-01-01', True),  # только обязательные поля
+        (fake.first_name(), fake.last_name(), fake.middle_name(), fake.ascii_email(), fake.url(), fake.phone_number(), fake.date(), fake.boolean()),  # Все поля
+        (fake.first_name(), fake.last_name(), '', fake.ascii_email(), '', '', fake.date(), fake.boolean()),  # только обязательные поля
         # Негативные тесты
-        pytest.param('', '', '', '', '', '', '', True, marks=pytest.mark.xfail)  # Все пустые поля
+        pytest.param('', '', '', '', '', '', '', fake.boolean(), marks=pytest.mark.xfail)  # Все пустые поля
     ]
 )
 def test_new_employee(first_name, last_name, mid_name, email, url, phone, birthdate, is_active):
-    e = my_employee.new(first_name, last_name, mid_name, email, url, phone, birthdate, is_active)
-    assert e['id'] > 0  # Есть id нового сотрудника (полюбому больше 0)
+    comp_id = Company().add_company(fake.company(), fake.catch_phrase())  # Добавляем компанию и берем ее id
+    my_employee = Employee(comp_id)
+    emp_count_before = len(my_employee.list())  # Было сотрудников ДО
+    my_employee.new(first_name, last_name, mid_name, email, url, phone, birthdate, is_active)
+    emp_count_after = len(my_employee.list())  # Стало сотрудников после
+    Company().del_company(comp_id)  # Удаляем за собой
+    assert emp_count_before + 1 == emp_count_after
 
 
-def test_employee_list():
-    e = my_employee.list()
-    assert len(e) > 0  # Список присутствует
+@pytest.mark.parametrize(
+    'count',
+    [
+        5
+    ]
+)
+def test_employee_list(count):
+    comp_id = Company().add_company(fake.company(), fake.catch_phrase())  # Добавляем компанию и берем ее id
+    my_employee = Employee(comp_id)
+    emp_count_before = len(my_employee.list())  # Было сотрудников ДО
+
+    for i in range(0, count):
+        my_employee.new(fake.first_name(), fake.last_name(), fake.middle_name(), fake.ascii_email(), fake.url(), fake.phone_number(), fake.date(), fake.boolean())
+
+    emp_count_after = len(my_employee.list())  # Стало сотрудников после
+    Company().del_company(comp_id)  # Удаляем за собой
+    assert emp_count_before + count == emp_count_after  # Проверяем что все добавились
 
 
 def test_get_employee():
+    comp_id = Company().add_company(fake.company(), fake.catch_phrase())  # Добавляем компанию и берем ее id
+    my_employee = Employee(comp_id)
+    my_employee.new(fake.first_name(), fake.last_name(), fake.middle_name(), fake.ascii_email(), fake.url(), fake.phone_number(), fake.date(), fake.boolean())
     id = my_employee.list()[-1]['id']  # Получаем список, берем id последнего сотрудника
     e = my_employee.get(id)
-    assert e['id'] == id
+    Company().del_company(comp_id)  # Удаляем за собой
+    assert e['id'] == id  # Что просили, то и получили?
 
 
 @pytest.mark.parametrize(
     ('first_name, last_name, mid_name, email, url, phone, birthdate, is_active'),
     [
         # Позитивные тесты
-        ('Иванов', 'Иван', 'Иванович', 'test@test.ru', 'http://test.test', '1234567890', '2000-01-01', True),  # Все поля
-        ('', 'Петр', '', 'qwerty@rt.ru', '', '', '', True),  # только обязательные поля
+        (fake.first_name(), fake.last_name(), fake.middle_name(), fake.ascii_email(), fake.url(), fake.phone_number(), fake.date(), fake.boolean()),  # Все поля
+        (fake.first_name(), fake.last_name(), '', fake.ascii_email(), '', '', fake.date(), fake.boolean()),  # только обязательные поля
         # Негативные тесты
-        pytest.param('', '', '', '', '', '', '', True, marks=pytest.mark.xfail)  # Все пустые поля
+        pytest.param('', '', '', '', '', '', '', fake.boolean(), marks=pytest.mark.xfail)  # Все пустые поля
     ]
 )
 def test_edit_employee(first_name, last_name, mid_name, email, url, phone, birthdate, is_active):
-    id = my_employee.list()[-1]['id']
-    e = my_employee.edit(id, first_name, last_name, mid_name, email, url, phone, birthdate, is_active)
-    assert e['id'] == id  # Вернулся id отредактированного сотрудника
+    comp_id = Company().add_company(fake.company(), fake.catch_phrase())  # Добавляем компанию и берем ее id
+    my_employee = Employee(comp_id)
+    id = my_employee.new(fake.first_name(), fake.last_name(), fake.middle_name(), fake.ascii_email(), fake.url(), fake.phone_number(), fake.date(), fake.boolean())['id']  # Создаем сотрудника
+    edit_id = my_employee.edit(id, first_name, last_name, mid_name, email, url, phone, birthdate, is_active)['id']
+    Company().del_company(comp_id)  # Удаляем за собой
+    assert edit_id == id  # Вернулся id отредактированного сотрудника

@@ -4,18 +4,19 @@ from Auth import base_url, token
 
 class Employee:
     comp_id: str
+    api_method = 'employee'
 
     def __init__(self, comp_id):
         self.comp_id = comp_id  # Запоминаем id компании с которой будем работать
 
     def get(self, id):  # Получаем данные по id сотрудника
-        responce = requests.get(base_url + 'employee/' + str(id))
-        assert responce.status_code == 200
+        responce = requests.get(base_url + self.api_method + '/' + str(id))
+        assert responce.status_code == 200, responce.json()
         return responce.json()
 
     def list(self):  # Получаем список с данными всех сотрудников
-        responce = requests.get(base_url + 'employee', params={'company': self.comp_id})
-        assert responce.status_code == 200
+        responce = requests.get(base_url + self.api_method, params={'company': self.comp_id})
+        assert responce.status_code == 200, responce.json()
         return responce.json()
 
     def new(self, first_name, last_name, mid_name, email, url, phone, birthdate, is_active=True):  # Новый сотрудник
@@ -26,13 +27,12 @@ class Employee:
             "companyId": int(self.comp_id),
             "email": email,
             "url": url,
-            "phone": phone,
+            "phone": str(phone).replace('+', '').replace(' ', ''),
             "birthdate": birthdate,
             "isActive": is_active
         }
-        responce = requests.post(base_url + 'employee', headers={'x-client-token': token()}, json=schema)
-        # print(' NEW ', responce.status_code)
-        assert responce.status_code == 201
+        responce = requests.post(base_url + self.api_method, headers=token(), json=schema)
+        assert responce.status_code == 201, responce.json()
         return responce.json()
 
     def edit(self, id, first_name, last_name, mid_name, email, url, phone, birthdate, is_active=True):  # Редактируем сотрудника
@@ -42,11 +42,10 @@ class Employee:
             "middleName": mid_name,
             "email": email,
             "url": url,
-            "phone": phone,
+            "phone": str(phone).replace('+', '').replace(' ', ''),
             "birthdate": birthdate,
             "isActive": is_active
         }
-        responce = requests.patch(base_url + 'employee/' + str(id), headers={'x-client-token': token()}, json=schema)
-        # print(' EDIT ', responce.status_code)
-        assert responce.status_code == 200
+        responce = requests.patch(base_url + 'employee/' + str(id), headers=token(), json=schema)
+        assert responce.status_code == 200, responce.json()
         return responce.json()

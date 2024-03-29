@@ -2,16 +2,17 @@ import requests
 
 # тут храним общее для всех...
 base_url = 'https://x-clients-be.onrender.com/'
-x_client_token = ''
+token_header = {}
 
 
 def token():
-    return x_client_token
+    return token_header
 
 
 # ...и метод для авторизации
 def login(name, pswd):
-    global x_client_token
+    global token_header
     s = requests.post(base_url + 'auth/login', json={'username': name, 'password': pswd})
     assert s.status_code == 201
-    x_client_token = s.json()['userToken']  # запоминаем токен для дальнейшей работы
+    token_header['x-client-token'] = s.json()['userToken']  # запоминаем токен для дальнейшей работы
+    pass
