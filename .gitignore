@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+.vscode/
+*.json
+
 my.py
 # Файлы конфигурации для venv
 venv/
